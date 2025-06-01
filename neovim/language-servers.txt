@@ -1,0 +1,19 @@
+- css-lsp
+- docker-compose-language-service
+- emmet-language-server
+- eslint-lsp
+- gofumpt
+- goimports
+- gopls
+- html-lsp
+- js-debug-adapter
+- lua-language-server
+- prettier
+- rust-analyzer
+- shfmt
+- staticcheck
+- stylua
+- tailwindcss-language-server
+- typescript-language-server
+- yaml-language-server
+
