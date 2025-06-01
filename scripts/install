@@ -1,3 +1,5 @@
+#!/bin/bash
+
 DOTFILES_DIR="$HOME/.dotfiles"
 
 if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]]; then
@@ -6,6 +8,6 @@ if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]]; then
 fi
 
 [[ -L "$HOME/.zshrc" ]] && rm "$HOME/.zshrc"
-ln -s "$DOTFILES_DIR/zshrc" "$HOME/.zshrc"
+ln -s "$DOTFILES_DIR/shell/zshrc" "$HOME/.zshrc"
 
-echo "Symlinked ~/.zshrc to ~/.dotfiles/zshrc"
+echo "Symlinked ~/.zshrc to ~/.dotfiles/shell/zshrc"
