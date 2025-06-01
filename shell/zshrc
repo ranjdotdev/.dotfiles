@@ -1,0 +1,142 @@
+# Exports
+export ZSH="$HOME/.oh-my-zsh"
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+export LANG="en_US.UTF-8"
+export GOPATH="$HOME/go"
+export PATH="$PATH:$GOPATH/bin"
+export NVM_DIR="$HOME/.config/nvm"
+
+# oh-my-zsh
+ZSH_THEME="gentoo"
+CASE_SENSITIVE="true"
+plugins=(git golang heroku redis-cli zsh-autosuggestions zsh-syntax-highlighting)
+source "$ZSH/oh-my-zsh.sh"
+
+# Prompt: show cwd and git branch
+PROMPT='%1~$(b=$(git_branch); [[ -n $b ]] && echo " on $b") > '
+
+# Editor: vim over SSH, nvim locally
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR=vim
+else
+  export EDITOR=nvim
+fi
+
+# utils: reusable functions
+
+git_branch() {
+  git symbolic-ref --short HEAD 2>/dev/null
+}
+
+# make dir & cd into it
+mkc() {
+  [[ -z "$1" ]] && { echo "Usage: mc <nested/path/to/dir>"; return 1; }
+  mkdir -p -- "$1" && cd -- "$1"
+}
+
+# nested make
+nmk() {
+  [[ -z "$1" ]] && { echo "Usage: nmk <nested/path>"; return 1; }
+  target="$1"
+  base="${target##*/}"
+  if [[ "$base" == *.* ]]; then
+    # file case
+    dir="${target%/*}"
+    if [[ "$dir" == "$base" ]]; then
+      touch -- "$base"
+    else
+      mkdir -p -- "$dir" && touch -- "$dir/$base"
+    fi
+  else
+    # directory case
+    mkdir -p -- "$target"
+  fi
+}
+
+# temporary make
+tmk() {
+  [[ $# -eq 0 ]] && { echo "Usage: tmk <path> [<path> ...]"; return 1; }
+  for target in "$@"; do
+    base="${target##*/}"
+    if [[ "$base" == *.* ]]; then
+      dir="${target%/*}"
+      if [[ "$base" == tmp.* ]]; then
+        if [[ "$dir" == "$base" ]]; then
+          touch -- "$base"
+        else
+          mkdir -p -- "$dir" && touch -- "$dir/$base"
+        fi
+      else
+        if [[ "$dir" == "$base" ]]; then
+          touch -- "tmp.$base"
+        else
+          mkdir -p -- "$dir" && touch -- "$dir/tmp.$base"
+        fi
+      fi
+    else
+      if [[ "$target" != */* ]]; then
+        if [[ "$base" == tmp-* ]]; then
+          mkdir -p -- "$base"
+        else
+          mkdir -p -- "tmp-$base"
+        fi
+      else
+        first="${target%%/*}"
+        rest="${target#*/}"
+        if [[ "$first" == tmp-* ]]; then
+          mkdir -p -- "$first/$rest"
+        else
+          mkdir -p -- "tmp-$first/$rest"
+        fi
+      fi
+    fi
+  done
+}
+
+# cd up N levels in directory tree (default 1)
+up() {
+  n="${1:-1}"
+  [[ ! "$n" =~ ^[0-9]+$ ]] && { echo "Usage: up [n]"; return 1; }
+  cd "$(printf "../%.0s" $(seq 1 "$n"))" || return
+}
+
+extract() {
+  [[ -z "$1" ]] && { echo "Usage: extract <file>"; return 1; }
+  for file in "$@"; do
+    case "$file" in
+      *.tar.bz2)   tar xjf "$file"   ;;
+      *.tar.gz)    tar xzf "$file"   ;;
+      *.tar.xz)    tar xJf "$file"   ;;
+      *.tar)       tar xf "$file"    ;;
+      *.bz2)       bunzip2 "$file"   ;;
+      *.rar)       unrar x "$file"   ;;
+      *.gz)        gunzip "$file"    ;;
+      *.zip)       unzip "$file"     ;;
+      *.xz)        unxz "$file"      ;;
+      *.7z)        7z x "$file"      ;;
+      *)           echo "Unsupported archive format: $file" ;;
+    esac
+  done
+}
+
+# aliases: general
+alias c="clear"
+alias e="exit"
+alias ll="ls -alh"
+alias reload="source ~/.zshrc"
+alias v="nvim"
+alias gsettings='XDG_CURRENT_DESKTOP=GNOME gnome-control-center'
+
+# aliases: git
+alias gl='git log --oneline --graph --decorate --all'
+alias ga="git add"
+alias gc="git commit"
+alias gb="git branch"
+alias gco="git checkout"
+alias gp="git push"
+alias gs="git status"
+
+# fzf integration
+[[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+
