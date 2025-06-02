@@ -120,6 +120,38 @@ extract() {
   done
 }
 
+# Workspace navigation function with tab completion
+ws() {
+    local base_path="$HOME/personal/workspace"
+    
+    if [[ $# -eq 0 ]]; then
+        # No arguments: go to base workspace
+        cd "$base_path" 2>/dev/null || {
+            echo "ws: $base_path: No such file or directory" >&2
+            return 1
+        }
+    else
+        # With argument: go to subdirectory
+        local target_path="$base_path/$1"
+        cd "$target_path" 2>/dev/null || {
+            echo "ws: $target_path: No such file or directory" >&2
+            return 1
+        }
+    fi
+}
+
+# Tab completion for ws function
+_ws_completion() {
+    local base_path="$HOME/personal/workspace"
+    if [[ -d "$base_path" ]]; then
+        local directories=($(find "$base_path" -maxdepth 1 -type d -not -path "$base_path" -exec basename {} \; 2>/dev/null))
+        compadd -a directories
+    fi
+}
+
+# Register the completion function
+compdef _ws_completion ws
+
 # aliases: general
 alias c="clear"
 alias e="exit"
