@@ -29,6 +29,13 @@ git_branch() {
   git symbolic-ref --short HEAD 2>/dev/null
 }
 
+# Finder Vim - find and open files in neovim using fzf with bat preview
+fv() {
+  local files
+  files=$(fzf --multi --preview 'bat --style=numbers --color=always --theme=Nord {}') || return
+  [ -n "$files" ] && nvim $files
+}
+
 # make dir & cd into it
 mkc() {
   [[ -z "$1" ]] && { echo "Usage: mc <nested/path/to/dir>"; return 1; }
